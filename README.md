@@ -1,12 +1,12 @@
 # Project Bulletin Board
 
-A plain HTML/CSS/JavaScript frontend connected to MySQL through one small Node.js server:
+A plain HTML/CSS/JavaScript frontend connected to MySQL through a small Python FastAPI server:
 
 Browser → `GET /api/events` → MySQL `CollegeEventDB.Event`
 
 ## Run locally
 
-Requires Node.js 22+ and a running MySQL server.
+Requires Python 3.10+ and a running MySQL server.
 
 1. Create the database and load the sample data **once on a fresh database**:
    ```sh
@@ -17,14 +17,15 @@ Requires Node.js 22+ and a running MySQL server.
 
 2. Install the dependency and create your local configuration:
    ```sh
-   npm install
-   cp .env.example .env
+   python3 -m venv .venv
+   source .venv/bin/activate
+   pip install -r requirements.txt
    ```
-   Edit `.env` with your MySQL username and password. Keep this file private; it is ignored by Git.
+   Keep your existing `.env`. On a fresh checkout, copy `.env.example` to `.env` and enter your MySQL username and password. Quote passwords containing `#`, for example `DB_PASSWORD="your-password"`. Keep this file private; it is ignored by Git.
 
 3. Start the app:
    ```sh
-   npm start
+   python backend/server.py
    ```
    Open **http://localhost:3000**. Use this address instead of opening the HTML directly or using Live Server.
 
@@ -33,3 +34,5 @@ The upcoming event cards come from the database, ordered by start date. Events w
 This minimal integration reads events; registration, category filtering, and saved events are not implemented. No schema changes are required. Database credentials stay on the server, and the server binds to localhost for local development.
 
 If events fail to load, check that MySQL is running, the SQL files have been imported, and `.env` matches your database settings. The terminal logs the database error code.
+
+FastAPI serves the frontend and `/api/events` on the same port. API documentation is available at **http://localhost:3000/docs**. No Node.js or npm installation is needed. Activate `.venv` in each new terminal before starting the server.
