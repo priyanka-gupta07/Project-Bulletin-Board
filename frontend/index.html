@@ -93,91 +93,13 @@
         <section class="events" id="events">
             <div class="section-heading">
                 <h2>Upcoming Events <span>〰</span></h2>
-                <a href="#">View all events →</a>
+                <a href="#events">View all events →</a>
             </div>
 
-            <div class="event-grid">
-
-                <article class="event-card">
-                    <div class="event-image git">
-                        <strong>Git<br>Workshop</strong>
-                        <span>◆</span>
-                    </div>
-                    <span class="tag technical">Technical</span>
-                    <div class="event-info">
-                        <p>▣ &nbsp;12 Apr 2025 &nbsp;·&nbsp; 2:00 PM</p>
-                        <p>⌖ &nbsp;Lab 3, SPIT</p>
-                        <span class="price free">Free</span>
-                        <span class="save">♡</span>
-                    </div>
-                </article>
-
-                <article class="event-card">
-                    <div class="event-image science">
-                        <strong>Science<br>Conclave</strong>
-                        <span>⚛</span>
-                    </div>
-                    <span class="tag conclave">Conclaves</span>
-                    <div class="event-info">
-                        <p>▣ &nbsp;15 Apr 2025 &nbsp;·&nbsp; 10:00 AM</p>
-                        <p>⌖ &nbsp;Seminar Hall, SPIT</p>
-                        <span class="price">₹100</span>
-                        <span class="save">♡</span>
-                    </div>
-                </article>
-
-                <article class="event-card">
-                    <div class="event-image garba">
-                        <strong>GARBA<br>WORKSHOP</strong>
-                        <span>♩</span>
-                    </div>
-                    <span class="tag cultural">Cultural</span>
-                    <div class="event-info">
-                        <p>▣ &nbsp;21 Apr 2025 &nbsp;·&nbsp; 5:00 PM</p>
-                        <p>⌖ &nbsp;Open Ground, SPIT</p>
-                        <span class="price">₹50</span>
-                        <span class="save">♡</span>
-                    </div>
-                </article>
-
-                <article class="event-card">
-                    <div class="event-image valorant">
-                        <strong>VALORANT<br>TOURNAMENT</strong>
-                        <span>4</span>
-                    </div>
-                    <span class="tag gaming">Gaming</span>
-                    <div class="event-info">
-                        <p>▣ &nbsp;28 Apr 2025 &nbsp;·&nbsp; 9:00 AM</p>
-                        <p>⌖ &nbsp;Computer Lab, SPIT</p>
-                        <span class="price">₹200</span>
-                        <span class="save">♡</span>
-                    </div>
-                </article>
-
-            </div>
-        </section>
-
-        <!-- FEATURED -->
-        <section class="featured">
-            <div class="hackathon-poster">
-                <span>THE</span>
-                <strong>SPIT<br>HACKATHON</strong>
-                <small>BUILD · SOLVE · INNOVATE</small>
-                <div>💡</div>
-            </div>
-
-            <div class="featured-content">
-                <span class="featured-tag">Featured Event</span>
-                <h2>SPIT Hackathon 2025</h2>
-                <p class="date">▣ &nbsp;25 Apr 2025 &nbsp;·&nbsp; 9:00 AM – 26 Apr 2025 &nbsp;·&nbsp; 6:00 PM</p>
-                <p>⌖ &nbsp;Auditorium, SPIT</p>
-                <p>A 24-hour hackathon to build innovative solutions to real-world problems.<br>
-                   Open to all branches. Form your team and register now!</p>
-                <span class="tag">Hackathon</span>
-                <span class="tag technical">Technical</span>
-            </div>
-
-            <button class="details">View Details →</button>
+            <p id="events-status" role="status">Loading events…</p>
+            <button id="events-retry" class="details" type="button" hidden>Try again</button>
+            <noscript>Enable JavaScript to load events.</noscript>
+            <div class="event-grid" id="event-grid"></div>
         </section>
 
         <!-- WHY USE -->
@@ -237,5 +159,6 @@
         <div class="footer-note">Same campus.<br>Bigger possibilities.</div>
     </footer>
 
+    <script src="app.js" defer></script>
 </body>
 </html>
