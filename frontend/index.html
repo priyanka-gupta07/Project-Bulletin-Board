@@ -7,7 +7,7 @@
     <link rel="stylesheet" href="style.css">
 </head>
 
-<body>
+<body id="home">
 
     <!-- NAVBAR -->
     <header class="navbar">
@@ -20,7 +20,7 @@
         </div>
 
         <nav>
-            <a class="active" href="#">Home</a>
+            <a class="active" href="#home">Home</a>
             <a href="#events">Events</a>
             <a href="#about">About</a>
             <a href="#contact">Contact</a>
@@ -74,18 +74,18 @@
         <section class="categories">
             <div class="section-heading">
                 <h2>Explore by Category <span>〰</span></h2>
-                <a href="#">View all →</a>
+                <a href="#events" data-show-all>View all →</a>
             </div>
 
             <div class="category-grid">
-                <div class="category pink"><div>💻</div><span>Technical</span></div>
-                <div class="category yellow"><div>💡</div><span>Workshops</span></div>
-                <div class="category purple"><div>♫</div><span>Cultural</span></div>
-                <div class="category green"><div>🏆</div><span>Sports</span></div>
-                <div class="category coral"><div>♧</div><span>Conclaves</span></div>
-                <div class="category blue"><div>☆</div><span>Competitions</span></div>
-                <div class="category orange"><div>🎮</div><span>Fun & Gaming</span></div>
-                <div class="category teal"><div>♡</div><span>Social</span></div>
+                <button type="button" class="category pink" data-category="Technical" aria-pressed="false"><span class="category-icon" aria-hidden="true">💻</span><span>Technical</span></button>
+                <button type="button" class="category yellow" data-category="Workshops" aria-pressed="false"><span class="category-icon" aria-hidden="true">💡</span><span>Workshops</span></button>
+                <button type="button" class="category purple" data-category="Cultural" aria-pressed="false"><span class="category-icon" aria-hidden="true">♫</span><span>Cultural</span></button>
+                <button type="button" class="category green" data-category="Sports" aria-pressed="false"><span class="category-icon" aria-hidden="true">🏆</span><span>Sports</span></button>
+                <button type="button" class="category coral" data-category="Conclaves" aria-pressed="false"><span class="category-icon" aria-hidden="true">♧</span><span>Conclaves</span></button>
+                <button type="button" class="category blue" data-category="Competitions" aria-pressed="false"><span class="category-icon" aria-hidden="true">☆</span><span>Competitions</span></button>
+                <button type="button" class="category orange" data-category="Fun & Gaming" aria-pressed="false"><span class="category-icon" aria-hidden="true">🎮</span><span>Fun & Gaming</span></button>
+                <button type="button" class="category teal" data-category="Social" aria-pressed="false"><span class="category-icon" aria-hidden="true">♡</span><span>Social</span></button>
             </div>
         </section>
 
@@ -93,9 +93,17 @@
         <section class="events" id="events">
             <div class="section-heading">
                 <h2>Upcoming Events <span>〰</span></h2>
-                <a href="#events">View all events →</a>
+                <a href="#events" data-show-all>View all events →</a>
             </div>
 
+            <div class="event-toolbar">
+                <label for="event-search">Search events</label>
+                <input id="event-search" type="search" placeholder="Name, venue or eligibility">
+                <button id="saved-filter" class="details" type="button" aria-pressed="false">Saved events (0)</button>
+                <button id="clear-filters" class="details" type="button">Show all</button>
+            </div>
+            <p id="filter-summary" class="filter-summary" aria-live="polite"></p>
+            <p id="save-status" class="filter-summary" role="status"></p>
             <p id="events-status" role="status">Loading events…</p>
             <button id="events-retry" class="details" type="button" hidden>Try again</button>
             <noscript>Enable JavaScript to load events.</noscript>
@@ -122,7 +130,7 @@
                 <div>
                     <div class="why-icon">☆</div>
                     <h3>Save & Track</h3>
-                    <p>Keep your interest and registered events in one place.</p>
+                    <p>Save events you’re interested in on this browser.</p>
                 </div>
                 <div>
                     <div class="why-icon">♙</div>
@@ -148,17 +156,23 @@
         </div>
 
         <div class="footer-links">
-            <a href="#">Home</a>
+            <a href="#home">Home</a>
             <a href="#events">Events</a>
             <a href="#about">About</a>
             <a href="#contact">Contact</a>
         </div>
 
-        <div class="socials">◎ &nbsp; in &nbsp; ▶</div>
+        <a class="contact-link" href="https://www.spit.ac.in/" target="_blank" rel="noopener noreferrer">Visit SPIT website ↗</a>
 
         <div class="footer-note">Same campus.<br>Bigger possibilities.</div>
     </footer>
 
+    <dialog id="event-dialog" aria-labelledby="event-title">
+        <button id="close-dialog" class="details dialog-close" type="button" aria-label="Close event details">Close ×</button>
+        <h2 id="event-title"></h2>
+        <dl id="event-details"></dl>
+        <button id="dialog-save" class="details" type="button">Save event</button>
+    </dialog>
     <script src="app.js" defer></script>
 </body>
 </html>
