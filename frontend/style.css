@@ -101,7 +101,7 @@ body {
     padding: 40px 5%;
     position: relative;
     overflow: hidden;
-    background-image: url(assets/bulletin1.jpg);
+    background: linear-gradient(135deg, #d8b15b, #f2e2b0);
 }
 
 .hero-paper {
@@ -188,7 +188,7 @@ body {
 
 .photo {
     position: absolute;
-    background: #eee;
+    background: #fff;
     padding: 10px;
     box-shadow: 2px 4px 10px rgba(0,0,0,.3);
     font-family: var(--font-sans);
@@ -234,21 +234,17 @@ body {
     display: flex;
     align-items: center;
     justify-content: center;
-    color: white;
-    font-size: 24px;
-    
-}
-
-/*CAMPUS AND CROWD PHOTOS*/
-.campus-photo {
-    background-image: url("assets/spit-campus.jpeg");
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
 }
 
+.campus-photo {
+    background-image: url("./assets/images.jpeg");
+}
+
 .crowd-photo {
-    background: linear-gradient(160deg, #351d3b, #e45a32);
+    background-image: red !important;
 }
 
 /* SHARED SECTIONS */

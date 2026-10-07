@@ -20,6 +20,10 @@ ROOT = Path(__file__).resolve().parent.parent
 load_dotenv(ROOT / ".env", interpolate=False)
 app = FastAPI(title="Bulletin Board API")
 logger = logging.getLogger(__name__)
+ASSET_FILES = {
+    "images.jpeg": ROOT / "assets" / "images.jpeg",
+    "crowd.jpeg": ROOT / "assets" / "crowd.jpeg",
+}
 
 
 def database_connection():
@@ -226,6 +230,14 @@ def styles():
 @app.get("/app.js", include_in_schema=False)
 def javascript():
     return FileResponse(ROOT / "frontend" / "app.js", media_type="text/javascript")
+
+
+@app.get("/assets/{asset_name}", include_in_schema=False)
+def asset(asset_name: str):
+    asset_path = ASSET_FILES.get(asset_name)
+    if asset_path is None or not asset_path.is_file():
+        return JSONResponse({"error": "Asset not found."}, status_code=404)
+    return FileResponse(asset_path)
 
 
 if __name__ == "__main__":
