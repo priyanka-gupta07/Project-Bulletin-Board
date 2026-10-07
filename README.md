@@ -47,7 +47,7 @@ Requires Python 3.10+ and a running MySQL server.
 
 The upcoming event cards come from the database, ordered by start date. Events whose end date (or start date when no end date is set) has passed are excluded. Undated events are included. Refresh the page after changing records in MySQL. The old hardcoded featured event has been removed to avoid displaying stale data.
 
-The page supports event details, search, category filters, saved events, and external registration links. Categories use keyword matching on event names because the schema has no category field; an event can match multiple categories. Saved events use browser local storage and do not register participants in the database. Sample registration links point to `example.com` and should be replaced with real links. Database credentials stay on the server, and the server binds to localhost for local development.
+The page supports event details, search, category filters, saved events, external registration links, and adding, editing, and deleting your own events. Categories use keyword matching on event names because the schema has no category field; an event can match multiple categories. Saved events use browser local storage and do not register participants in the database. Sample registration links point to `example.com` and should be replaced with real links. Database credentials stay on the server, and the server binds to localhost for local development.
 
 If events fail to load, check that MySQL is running, the SQL files have been imported, and `.env` matches your database settings. The terminal logs the database error code.
 

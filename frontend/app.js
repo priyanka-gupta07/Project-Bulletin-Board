@@ -19,6 +19,7 @@ let category = '';
 let savedOnly = false;
 let loaded = false;
 let selectedEvent = null;
+let editingEventId = null;
 let saved = new Set();
 
 function newOwnerId() {
@@ -166,6 +167,13 @@ function eventCard(event, index) {
     updateSaveButton(save, event);
     save.addEventListener('click', () => toggleSaved(event));
     actions.append(details, save);
+    if (event.Is_Own_Event) {
+        const edit = element('button', 'details edit-event', 'Edit');
+        edit.type = 'button';
+        edit.setAttribute('aria-label', `Edit your event ${event.Event_Name}`);
+        edit.addEventListener('click', () => editOwnEvent(event));
+        actions.append(edit);
+    }
     if (event.Registration_Link) {
         const register = element('a', 'details register-event', 'Register ↗');
         register.href = event.Registration_Link;
@@ -182,6 +190,20 @@ function eventCard(event, index) {
     }
     card.append(info, actions);
     return card;
+}
+
+function editOwnEvent(event) {
+    editingEventId = event.Event_ID;
+    document.querySelector('#add-event-title').textContent = 'Update your event';
+    document.querySelector('#save-own-event').textContent = 'Save changes';
+    addEventForm.elements.name.value = event.Event_Name;
+    addEventForm.elements.date.value = event.Start_Date;
+    addEventForm.elements.venue.value = event.Venue_Name || '';
+    addEventForm.elements.location.value = event.Location || '';
+    addEventForm.elements.eligibility.value = event.Eligibility || '';
+    addEventForm.elements.fee.value = event.Registration_FEE ?? '';
+    addEventForm.elements.registration_link.value = event.Registration_Link || '';
+    openDialog(addEventDialog);
 }
 
 async function deleteOwnEvent(event) {
@@ -205,8 +227,8 @@ async function addOwnEvent(form) {
     const submit = form.querySelector('[type="submit"]');
     submit.disabled = true;
     try {
-        const response = await fetch('/api/events', {
-            method: 'POST',
+        const response = await fetch(editingEventId === null ? '/api/events' : `/api/events/${editingEventId}`, {
+            method: editingEventId === null ? 'POST' : 'PUT',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
                 owner_id: ownerId,
@@ -221,13 +243,17 @@ async function addOwnEvent(form) {
         });
         if (!response.ok) throw new Error('Could not save event');
         const event = await response.json();
-        events.unshift(event);
+        if (editingEventId === null) events.unshift(event);
+        else events = events.map(item => item.Event_ID === editingEventId ? event : item);
         category = '';
         savedOnly = false;
         search.value = '';
         form.reset();
+        editingEventId = null;
+        document.querySelector('#add-event-title').textContent = 'Pin an event to the board';
+        submit.textContent = 'Add event';
         closeDialog(addEventDialog);
-        document.querySelector('#save-status').textContent = 'Your event was added to the board.';
+        document.querySelector('#save-status').textContent = 'Your event was saved to the board.';
         renderEvents();
     } catch {
         document.querySelector('#save-status').textContent = 'Could not save your event. Check that MySQL is running and try again.';
@@ -276,7 +302,13 @@ async function loadEvents() {
 }
 
 retry.addEventListener('click', loadEvents);
-document.querySelector('#add-event').addEventListener('click', () => openDialog(addEventDialog));
+document.querySelector('#add-event').addEventListener('click', () => {
+    editingEventId = null;
+    addEventForm.reset();
+    document.querySelector('#add-event-title').textContent = 'Pin an event to the board';
+    document.querySelector('#save-own-event').textContent = 'Add event';
+    openDialog(addEventDialog);
+});
 document.querySelector('#close-add-event').addEventListener('click', () => closeDialog(addEventDialog));
 addEventForm.addEventListener('submit', event => {
     event.preventDefault();

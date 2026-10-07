@@ -137,6 +137,55 @@ def create_event(event: UserEventInput):
         )
 
 
+@app.put("/api/events/{event_id}")
+def update_event(event_id: int, event: UserEventInput):
+    headers = {"Cache-Control": "no-store"}
+    if event_id >= 0:
+        return JSONResponse({"error": "Only your own events can be updated."}, status_code=404, headers=headers)
+    try:
+        with database_connection() as connection:
+            with connection.cursor() as cursor:
+                cursor.execute("""
+                    UPDATE User_Event
+                    SET Event_Name = %s, Start_Date = %s, Eligibility = %s,
+                        Registration_FEE = %s, Venue_Name = %s, Location = %s,
+                        Registration_Link = %s
+                    WHERE Event_ID = %s AND Owner_ID = %s
+                """, (
+                    event.event_name.strip(), event.start_date, event.eligibility,
+                    event.registration_fee, event.venue_name, event.location,
+                    str(event.registration_link) if event.registration_link else None,
+                    -event_id, str(event.owner_id),
+                ))
+                cursor.execute(
+                    "SELECT Event_ID FROM User_Event WHERE Event_ID = %s AND Owner_ID = %s",
+                    (-event_id, str(event.owner_id)),
+                )
+                if not cursor.fetchone():
+                    return JSONResponse({"error": "Event not found."}, status_code=404, headers=headers)
+        result = {
+            "Event_ID": event_id,
+            "Event_Name": event.event_name.strip(),
+            "Start_Date": event.start_date.isoformat(),
+            "End_Date": event.start_date.isoformat(),
+            "Eligibility": event.eligibility,
+            "Registration_FEE": str(event.registration_fee) if event.registration_fee is not None else None,
+            "Registration_Link": str(event.registration_link) if event.registration_link else None,
+            "Venue_Name": event.venue_name,
+            "Location": event.location,
+            "Max_participants": None,
+            "Is_Own_Event": True,
+        }
+        return JSONResponse(jsonable_encoder(result), headers=headers)
+    except pymysql.MySQLError as error:
+        logger.error("Could not update event; database error code: %s", error.args[0])
+        return JSONResponse(
+            {"error": "The event could not be updated. Please try again."},
+            status_code=503,
+            headers=headers,
+        )
+
+
 @app.delete("/api/events/{event_id}", status_code=204)
 def delete_event(event_id: int, owner_id: UUID):
     headers = {"Cache-Control": "no-store"}
