@@ -685,14 +685,23 @@ button:focus-visible, a:focus-visible, input:focus-visible {
 .event-actions { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 12px; }
 .event-actions .details { padding: 8px 10px; font-size: 12px; }
 .save-event[aria-pressed="true"] { background: #e9b0bd; }
+.delete-event { background: #efb1b9; }
+.register-event { display: inline-block; text-decoration: none; }
 .contact-link { color: var(--ink); font-size: 13px; }
-#event-dialog { margin: auto; padding: 28px; width: min(520px, 90vw); max-height: 85vh; overflow: auto; border: 1px solid var(--brown); border-radius: 16px; background: var(--paper-light); color: var(--ink); }
-#event-dialog::backdrop { background: rgba(23,35,58,.55); }
+#event-dialog, #add-event-dialog { margin: auto; padding: 28px; width: min(520px, 90vw); max-height: 85vh; overflow: auto; border: 1px solid var(--brown); border-radius: 16px; background: var(--paper-light); color: var(--ink); }
+dialog::backdrop { background: rgba(23,35,58,.55); }
+.dialog-fallback[open] { display: block; position: fixed; inset: auto; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 1000; box-shadow: 0 0 0 100vmax rgba(23,35,58,.55); }
+dialog:not([open]) { display: none; }
 .dialog-close { display: block; margin-left: auto; margin-bottom: 20px; }
 #event-title { font-size: 25px; }
 #event-details { margin: 20px 0; }
 #event-details dt { font-weight: 700; margin-top: 14px; font-size: 13px; }
 #event-details dd { margin: 4px 0 0; line-height: 1.5; font-size: 15px; }
+.form-note { margin: 6px 0 20px; color: #65452d; font-size: 13px; }
+#add-event-form { display: grid; gap: 8px; }
+#add-event-form label { margin-top: 6px; font-size: 13px; font-weight: 600; }
+#add-event-form input { width: 100%; padding: 10px 12px; border: 1px solid var(--line); border-radius: 8px; background: white; color: var(--ink); font: inherit; }
+.form-actions { display: flex; justify-content: flex-end; margin-top: 12px; }
 @media (max-width: 700px) {
     .navbar { height: auto; min-height: 64px; flex-wrap: wrap; gap: 12px; padding: 12px 20px; }
     .navbar nav { display: flex; margin-left: 0; gap: 12px; flex-wrap: wrap; }

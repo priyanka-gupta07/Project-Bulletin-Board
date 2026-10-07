@@ -99,6 +99,7 @@
             <div class="event-toolbar">
                 <label for="event-search">Search events</label>
                 <input id="event-search" type="search" placeholder="Name, venue or eligibility">
+                <button id="add-event" class="details" type="button">＋ Add your event</button>
                 <button id="saved-filter" class="details" type="button" aria-pressed="false">Saved events (0)</button>
                 <button id="clear-filters" class="details" type="button">Show all</button>
             </div>
@@ -172,6 +173,30 @@
         <h2 id="event-title"></h2>
         <dl id="event-details"></dl>
         <button id="dialog-save" class="details" type="button">Save event</button>
+    </dialog>
+    <dialog id="add-event-dialog" aria-labelledby="add-event-title">
+        <button id="close-add-event" class="details dialog-close" type="button">Close ×</button>
+        <h2 id="add-event-title">Pin an event to the board</h2>
+        <p class="form-note">Your event is saved in this browser.</p>
+        <form id="add-event-form">
+            <label for="new-event-name">Event name</label>
+            <input id="new-event-name" name="name" maxlength="50" required>
+            <label for="new-event-date">Date</label>
+            <input id="new-event-date" name="date" type="date" required>
+            <label for="new-event-venue">Venue</label>
+            <input id="new-event-venue" name="venue" maxlength="50" placeholder="e.g. Seminar Hall">
+            <label for="new-event-location">Location</label>
+            <input id="new-event-location" name="location" maxlength="50" placeholder="e.g. Block C">
+            <label for="new-event-eligibility">Who can join?</label>
+            <input id="new-event-eligibility" name="eligibility" maxlength="50" placeholder="e.g. All Students">
+            <label for="new-event-fee">Fee in ₹ (optional)</label>
+            <input id="new-event-fee" name="fee" type="number" min="0" step="0.01" placeholder="Leave blank if unknown">
+            <label for="new-event-registration-link">Registration link (optional)</label>
+            <input id="new-event-registration-link" name="registration_link" type="url" maxlength="500" placeholder="https://...">
+            <div class="form-actions">
+                <button class="details" type="submit">Add event</button>
+            </div>
+        </form>
     </dialog>
     <script src="app.js" defer></script>
 </body>

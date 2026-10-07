@@ -6,19 +6,56 @@ const savedFilter = document.querySelector('#saved-filter');
 const summary = document.querySelector('#filter-summary');
 const dialog = document.querySelector('#event-dialog');
 const dialogSave = document.querySelector('#dialog-save');
+const addEventDialog = document.querySelector('#add-event-dialog');
+const addEventForm = document.querySelector('#add-event-form');
+const newEventDate = document.querySelector('#new-event-date');
 const dateFormat = new Intl.DateTimeFormat('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
 const priceFormat = new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 2 });
 const storageKey = 'spit-saved-events';
+const ownerKey = 'spit-event-owner';
+let ownerId;
 let events = [];
 let category = '';
 let savedOnly = false;
 let loaded = false;
 let selectedEvent = null;
 let saved = new Set();
+
+function newOwnerId() {
+    if (globalThis.crypto?.randomUUID) return globalThis.crypto.randomUUID();
+    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, char => {
+        const value = Math.floor(Math.random() * 16);
+        return (char === 'x' ? value : (value & 0x3) | 0x8).toString(16);
+    });
+}
+
+function openDialog(target) {
+    if (typeof target.showModal === 'function') target.showModal();
+    else {
+        target.classList.add('dialog-fallback');
+        target.setAttribute('open', '');
+    }
+}
+
+function closeDialog(target) {
+    if (typeof target.close === 'function' && target.open) target.close();
+    else target.removeAttribute('open');
+    target.classList.remove('dialog-fallback');
+}
+
 try {
     const stored = JSON.parse(localStorage.getItem(storageKey) || '[]');
     if (Array.isArray(stored)) saved = new Set(stored.filter(Number.isInteger));
 } catch { /* Saving still works for this page when storage is unavailable. */ }
+try {
+    ownerId = localStorage.getItem(ownerKey);
+    if (!ownerId) {
+        ownerId = newOwnerId();
+        localStorage.setItem(ownerKey, ownerId);
+    }
+} catch { ownerId = newOwnerId(); }
+const today = new Date();
+newEventDate.min = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
 
 // The existing schema has no category column. Match descriptive event names.
 const categoryPatterns = {
@@ -92,8 +129,18 @@ function showDetails(event) {
         ['Registration fee', fee(event)],
         ['Maximum participants', event.Max_participants ?? 'To be announced'],
     ]) details.append(element('dt', '', label), element('dd', '', String(value)));
+    if (event.Registration_Link) {
+        const label = element('dt', '', 'Registration');
+        const description = element('dd', '', '');
+        const link = element('a', '', 'Open registration form ↗');
+        link.href = event.Registration_Link;
+        link.target = '_blank';
+        link.rel = 'noopener noreferrer';
+        description.append(link);
+        details.append(label, description);
+    }
     updateSaveButton(dialogSave, event);
-    dialog.showModal();
+    openDialog(dialog);
 }
 
 function eventCard(event, index) {
@@ -119,8 +166,74 @@ function eventCard(event, index) {
     updateSaveButton(save, event);
     save.addEventListener('click', () => toggleSaved(event));
     actions.append(details, save);
+    if (event.Registration_Link) {
+        const register = element('a', 'details register-event', 'Register ↗');
+        register.href = event.Registration_Link;
+        register.target = '_blank';
+        register.rel = 'noopener noreferrer';
+        actions.append(register);
+    }
+    if (event.Is_Own_Event) {
+        const remove = element('button', 'details delete-event', 'Delete');
+        remove.type = 'button';
+        remove.setAttribute('aria-label', `Delete your event ${event.Event_Name}`);
+        remove.addEventListener('click', () => deleteOwnEvent(event));
+        actions.append(remove);
+    }
     card.append(info, actions);
     return card;
+}
+
+async function deleteOwnEvent(event) {
+    try {
+        const response = await fetch(`/api/events/${event.Event_ID}?owner_id=${encodeURIComponent(ownerId)}`, { method: 'DELETE' });
+        if (!response.ok) throw new Error('Could not delete event');
+        events = events.filter(item => item.Event_ID !== event.Event_ID);
+        saved.delete(event.Event_ID);
+        localStorage.setItem(storageKey, JSON.stringify([...saved]));
+        if (selectedEvent?.Event_ID === event.Event_ID) closeDialog(dialog);
+        document.querySelector('#save-status').textContent = 'Your event was deleted.';
+        renderEvents();
+    } catch {
+        document.querySelector('#save-status').textContent = 'Could not delete your event. Please try again.';
+    }
+}
+
+async function addOwnEvent(form) {
+    const data = new FormData(form);
+    const feeValue = data.get('fee');
+    const submit = form.querySelector('[type="submit"]');
+    submit.disabled = true;
+    try {
+        const response = await fetch('/api/events', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                owner_id: ownerId,
+                event_name: data.get('name').trim(),
+                start_date: data.get('date'),
+                eligibility: data.get('eligibility').trim() || null,
+                registration_fee: feeValue === '' ? null : Number(feeValue),
+                registration_link: data.get('registration_link').trim() || null,
+                venue_name: data.get('venue').trim() || null,
+                location: data.get('location').trim() || null,
+            }),
+        });
+        if (!response.ok) throw new Error('Could not save event');
+        const event = await response.json();
+        events.unshift(event);
+        category = '';
+        savedOnly = false;
+        search.value = '';
+        form.reset();
+        closeDialog(addEventDialog);
+        document.querySelector('#save-status').textContent = 'Your event was added to the board.';
+        renderEvents();
+    } catch {
+        document.querySelector('#save-status').textContent = 'Could not save your event. Check that MySQL is running and try again.';
+    } finally {
+        submit.disabled = false;
+    }
 }
 
 function renderEvents() {
@@ -151,7 +264,7 @@ async function loadEvents() {
     retry.hidden = true;
     grid.replaceChildren();
     try {
-        const response = await fetch('/api/events', { signal: AbortSignal.timeout(10000) });
+        const response = await fetch(`/api/events?owner_id=${encodeURIComponent(ownerId)}`, { signal: AbortSignal.timeout(10000) });
         if (!response.ok) throw new Error('Could not load events');
         events = await response.json();
         loaded = true;
@@ -163,6 +276,12 @@ async function loadEvents() {
 }
 
 retry.addEventListener('click', loadEvents);
+document.querySelector('#add-event').addEventListener('click', () => openDialog(addEventDialog));
+document.querySelector('#close-add-event').addEventListener('click', () => closeDialog(addEventDialog));
+addEventForm.addEventListener('submit', event => {
+    event.preventDefault();
+    addOwnEvent(addEventForm);
+});
 search.addEventListener('input', renderEvents);
 savedFilter.addEventListener('click', () => { savedOnly = !savedOnly; renderEvents(); });
 document.querySelector('#clear-filters').addEventListener('click', clearFilters);
@@ -172,11 +291,16 @@ document.querySelectorAll('[data-category]').forEach(button => button.addEventLi
     renderEvents();
     document.querySelector('#events').scrollIntoView({ behavior: 'smooth' });
 }));
-document.querySelector('#close-dialog').addEventListener('click', () => dialog.close());
+document.querySelector('#close-dialog').addEventListener('click', () => closeDialog(dialog));
 dialogSave.addEventListener('click', () => { if (selectedEvent) toggleSaved(selectedEvent); });
 dialog.addEventListener('click', event => {
     const bounds = dialog.getBoundingClientRect();
-    if (event.target === dialog && (event.clientX < bounds.left || event.clientX > bounds.right || event.clientY < bounds.top || event.clientY > bounds.bottom)) dialog.close();
+    if (event.target === dialog && (event.clientX < bounds.left || event.clientX > bounds.right || event.clientY < bounds.top || event.clientY > bounds.bottom)) closeDialog(dialog);
+});
+document.addEventListener('keydown', event => {
+    if (event.key === 'Escape') {
+        document.querySelectorAll('dialog.dialog-fallback[open]').forEach(closeDialog);
+    }
 });
 function updateNavigation() {
     const target = window.location.hash || '#home';
